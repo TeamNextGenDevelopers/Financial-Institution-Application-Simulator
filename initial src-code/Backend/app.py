@@ -1,20 +1,28 @@
 from __future__ import annotations
 from flask import Flask, render_template, request
-import main
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from main import Bank
+from cloud_database import Database
 
 
 app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return render_template('login.html')
+CORS(app)
+connection_string = "mongodb+srv://tahshinshahriar:i2NK6Sc0jmCnhjWO@cluster0.nafiayb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+db_name = "financial-data"
+collection_name = "user-info-collection"
+db = Database(connection_string, db_name, collection_name)
+bank = Bank() 
 
 #Login Page
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form['xxxx']
-    password = request.form['xxxx']
-    
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+    if db.get_password(email) == password:
+        return jsonify({'message': 'Login successful!'}), 200
+    return jsonify({'message': 'Invalid credentials!'}), 401
 
 
 # Teller Interface
@@ -29,20 +37,13 @@ def tellerHome():
     return tellerInterface(teller)
 
 
-@app.route('/reg')
-def register():
-    return render_template('registration.html')
-
-
-@app.route('/regp', methods=['POST'])
+@app.route('/register-client', methods=['POST'])
 def reg():
     username = request.form['username']
     name = request.form['name']
     email = request.form['email']
     phone = request.form['phone']
     addr = request.form['addr']
-
-    clientp = teller.registerClient(username, name, email, phone, addr)
 
     if clientp != False or None:
         return render_template('regsuccess.html', name=clientp.username, email=clientp.e_mail, passwd=clientp._password, phone=clientp.phone, accno=clientp._accountNumber, addr=clientp.address)

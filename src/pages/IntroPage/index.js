@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Link, useLocation} from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -11,6 +11,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import HeaderB from '../../components/header';
+
+import axios from 'axios';
 
 
 
@@ -48,15 +50,24 @@ function Copyright(props) {
 function IntroductionPage() {
   const location = useLocation();
   const accountCreated = location.state?.accountCreated || false;
+  const navigate = useNavigate();
   
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    const email = data.get('email');
+    const password = data.get('password');
+
+    axios.post('http://localhost:5000/login', { email, password })
+      .then(response => {
+        console.log(response.data);
+        navigate('/dashboard');
+      })
+      .catch(error => {
+        console.error('There was an error!', error);
+        // Handle error (e.g., show an error message)
+      });
   };
   
 
